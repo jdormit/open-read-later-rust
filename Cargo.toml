@@ -1,0 +1,6 @@
+[package]
+name = "open-read-later-impl"
+version = "0.1.0"
+authors = ["jdormitzer <jdormitzer@hubspot.com>"]
+
+[dependencies]
