@@ -1,5 +1,4 @@
 use std::fmt;
-use std::io;
 use std::result::Result;
 use std::vec::Vec;
 use std::string::String;
@@ -7,20 +6,20 @@ use std::collections::HashMap;
 use regex::Regex;
 
 #[derive(Debug)]
-struct LinkEntry {
+pub struct LinkEntry {
     url: String,
     title: String,
-    tags: Option<Vec<String>>,
+    tags: Vec<String>,
 }
 
-struct LinkEntryBuilder {
+pub struct LinkEntryBuilder {
     url: Option<String>,
     title: Option<String>,
     tags: Vec<String>,
 }
 
 impl LinkEntryBuilder {
-    fn new() -> LinkEntryBuilder {
+    pub fn new() -> LinkEntryBuilder {
         LinkEntryBuilder {
             url: None,
             title: None,
@@ -28,36 +27,41 @@ impl LinkEntryBuilder {
         }
     }
 
-    fn setUrl(&mut self, url: &str) -> &mut LinkEntryBuilder {
+    pub fn set_url(mut self, url: &str) -> LinkEntryBuilder {
         self.url = Some(String::from(url));
         self
     }
 
-    fn setTitle(&mut self, title: &str) -> &mut LinkEntryBuilder {
+    pub fn set_title(mut self, title: &str) -> LinkEntryBuilder {
         self.title = Some(String::from(title));
         self
     }
 
-    fn addTag(&mut self, tag: &str) -> &mut LinkEntryBuilder {
+    pub fn add_tag(mut self, tag: &str) -> LinkEntryBuilder {
         self.tags.push(String::from(tag));
         self
     }
 
-    fn build(&self) -> Result<LinkEntry, &str> {
+    pub fn add_tags(mut self, tags: &mut Vec<&str>) -> LinkEntryBuilder {
+        self.tags.append(&mut tags.iter().map(|&s| String::from(s)).collect::<Vec<String>>());
+        self
+    }
+
+    pub fn build(self) -> Result<LinkEntry, String> {
         match self.url {
-            None => Err("URL not set"),
+            None => Err(String::from("URL not set")),
             Some(url) => match self.title {
-                None => Err("title not set"),
+                None => Err(String::from("title not set")),
                 Some(title) => match self.tags.len() {
                     0 => Ok(LinkEntry {
                         url: url,
                         title: title,
-                        tags: None,
+                        tags: Vec::new(),
                     }),
                     _ => Ok(LinkEntry {
                         url: url,
                         title: title,
-                        tags: Some(self.tags),
+                        tags: self.tags,
                     }),
                 }
             }
@@ -66,18 +70,18 @@ impl LinkEntryBuilder {
 }
 
 impl LinkEntry {
-    fn parse(text: String) -> io::Result<LinkEntry> {
+    fn parse(text: String) -> Result<LinkEntry, String> {
         lazy_static! {
-            static ref re: Regex = Regex::new(r"^(.+?):\s?(.+)$").unwrap();
+            static ref RE: Regex = Regex::new(r"^(.+?):\s?(.+)$").unwrap();
         }
-        re.captures_iter(&text)
+        RE.captures_iter(&text)
             .fold(LinkEntryBuilder::new(), |builder, cap| match cap[1].trim() {
-                "url" => builder.setUrl(cap[2].trim()),
-                "title" => builder.setTitle(cap[2].trim()),
+                "url" => builder.set_url(cap[2].trim()),
+                "title" => builder.set_title(cap[2].trim()),
                 "tags" => cap[2]
                     .trim()
                     .split(",")
-                    .fold(builder, |builder, tag| builder.addTag(tag.trim())),
+                    .fold(builder, |b, tag| b.add_tag(tag.trim())),
                 _ => builder
             }).build()
     }
@@ -85,15 +89,15 @@ impl LinkEntry {
 
 impl fmt::Display for LinkEntry {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "url: {}\ntitle: {}{}", self.url, self.title, match self.tags {
-            None => String::from(""),
-            Some(tags) => String::from("\ntags: ") + &tags.join(",")
+        write!(f, "url: {}\ntitle: {}{}", self.url, self.title, match self.tags.len() {
+            0 => String::from(""),
+            _ => String::from("\ntags: ") + &self.tags.join(",")
         })
     }
 }
 
 #[derive(Debug)]
-struct ReadLaterList {
+pub struct ReadLaterList {
     links: HashMap<String, LinkEntry>,
 }
 
@@ -104,34 +108,33 @@ impl ReadLaterList {
         }
     }
 
-    pub fn parse(text: String) -> io::Result<ReadLaterList> {
+    pub fn parse(text: String) -> Result<ReadLaterList, String> {
         text.split("\n---\n")
             .fold(Ok(ReadLaterList::new()),
-                  |readLaterListResult, linkText| match readLaterListResult {
-                      Error => Error,
-                      Ok(readLaterList) => match LinkEntry::parse(String::from(linkText)) {
-                          Error => Error,
-                          Ok(linkEntry) => Ok(readLaterList.addLink(linkEntry)),
+                  |read_later_list_result, link_test| match read_later_list_result {
+                      Err(msg) => Err(msg),
+                      Ok(read_later_list) => match LinkEntry::parse(String::from(link_test)) {
+                          Err(msg) => Err(msg),
+                          Ok(link_entry) => Ok(read_later_list.add_link(link_entry)),
                       }
                   })
     }
 
-    // TODO how to handle collisions?
-    pub fn addLink(&mut self, link: LinkEntry) -> &mut ReadLaterList {
-        self.links.insert(link.url, link);
+    pub fn add_link(mut self, link: LinkEntry) -> ReadLaterList {
+        self.links.insert(link.url.clone(), link);
         self
     }
 
-    pub fn getLink(&self, url: &str) -> Option<&LinkEntry> {
+    pub fn get_link(&self, url: &str) -> Option<&LinkEntry> {
         self.links.get(url)
     }
 
-    pub fn updateLink(&mut self, url: &str, newLink: LinkEntry) -> &mut ReadLaterList {
-        self.links.insert(newLink.url, newLink);
+    pub fn update_link(mut self, new_link: LinkEntry) -> ReadLaterList {
+        self.links.insert(new_link.url.clone(), new_link);
         self
     }
 
-    pub fn deleteLink(&mut self, url: &str) -> &mut ReadLaterList {
+    pub fn delete_link(mut self, url: &str) -> ReadLaterList {
         self.links.remove(url);
         self
     }
