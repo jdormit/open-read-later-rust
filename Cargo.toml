@@ -3,6 +3,15 @@ name = "open_read_later"
 version = "1.0.0"
 authors = ["Jeremy Dormitzer <jeremy.dormitzer@gmail.com>"]
 
+[lib]
+name = "open_read_later"
+path = "src/lib.rs"
+
+[[bin]]
+name = "readlater"
+path = "src/main.rs"
+
 [dependencies]
+clap = "2.26.0"
 lazy_static = "0.2.8"
 regex = "0.2"
