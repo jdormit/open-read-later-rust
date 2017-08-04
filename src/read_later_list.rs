@@ -5,7 +5,7 @@ use std::string::String;
 use std::collections::HashMap;
 use regex::Regex;
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct LinkEntry {
     url: String,
     title: String,
@@ -70,19 +70,27 @@ impl LinkEntryBuilder {
 }
 
 impl LinkEntry {
-    fn parse(text: String) -> Result<LinkEntry, String> {
+    pub fn builder() -> LinkEntryBuilder {
+        LinkEntryBuilder::new()
+    }
+
+    fn parse(text: &str) -> Result<LinkEntry, String> {
         lazy_static! {
-            static ref RE: Regex = Regex::new(r"^(.+?):\s?(.+)$").unwrap();
+            static ref RE: Regex = Regex::new(r"^(.+?)\s*:\s*(.+)$").unwrap();
         }
-        RE.captures_iter(&text)
-            .fold(LinkEntryBuilder::new(), |builder, cap| match cap[1].trim() {
-                "url" => builder.set_url(cap[2].trim()),
-                "title" => builder.set_title(cap[2].trim()),
-                "tags" => cap[2]
-                    .trim()
-                    .split(",")
-                    .fold(builder, |b, tag| b.add_tag(tag.trim())),
-                _ => builder
+        text.lines()
+            .fold(LinkEntryBuilder::new(), |builder, line| match RE.captures(&line) {
+                None => builder,
+                Some(cap) => match cap[1].trim() {
+                    "url" => builder.set_url(cap[2].trim()),
+                    "title" => builder.set_title(cap[2].trim()),
+                    "tags" => builder.add_tags(&mut cap[2]
+                                               .trim()
+                                               .split(",")
+                                               .map(|s| s.trim())
+                                               .collect::<Vec<&str>>()),
+                    _ => builder
+                }
             }).build()
     }
 }
@@ -91,12 +99,12 @@ impl fmt::Display for LinkEntry {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         write!(f, "url: {}\ntitle: {}{}", self.url, self.title, match self.tags.len() {
             0 => String::from(""),
-            _ => String::from("\ntags: ") + &self.tags.join(",")
+            _ => String::from("\ntags: ") + &self.tags.join(", ")
         })
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone, PartialEq)]
 pub struct ReadLaterList {
     links: HashMap<String, LinkEntry>,
 }
@@ -108,12 +116,12 @@ impl ReadLaterList {
         }
     }
 
-    pub fn parse(text: String) -> Result<ReadLaterList, String> {
+    pub fn parse(text: &str) -> Result<ReadLaterList, String> {
         text.split("\n---\n")
             .fold(Ok(ReadLaterList::new()),
-                  |read_later_list_result, link_test| match read_later_list_result {
+                  |read_later_list_result, link_text| match read_later_list_result {
                       Err(msg) => Err(msg),
-                      Ok(read_later_list) => match LinkEntry::parse(String::from(link_test)) {
+                      Ok(read_later_list) => match LinkEntry::parse(link_text) {
                           Err(msg) => Err(msg),
                           Ok(link_entry) => Ok(read_later_list.add_link(link_entry)),
                       }
@@ -142,9 +150,10 @@ impl ReadLaterList {
 
 impl fmt::Display for ReadLaterList {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "{}", self.links.values()
-               .map(|link| link.to_string())
-               .collect::<Vec<String>>()
-               .join("\n---\n"))
+        let mut vals = self.links.values()
+            .map(|link| link.to_string())
+            .collect::<Vec<String>>();
+        vals.sort();
+        write!(f, "{}", vals.join("\n---\n"))
     }
 }
