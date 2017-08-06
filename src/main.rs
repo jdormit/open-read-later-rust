@@ -2,6 +2,7 @@ extern crate open_read_later;
 extern crate clap;
 
 use std::env;
+use std::error::Error;
 use std::io::Read;
 use std::fs::OpenOptions;
 use open_read_later::read_later_list::ReadLaterList;
@@ -9,17 +10,13 @@ use clap::{Arg, App, SubCommand};
 
 fn main() {
     match run() {
-        Err(err) => println!("{}", err),
+        Err(err) => println!("Encountered error: {}. Please file an issue at https://github.com/jdormit/open-read-later-rust/issues/new", err),
         Ok(_) => return
     }
 }
 
-fn run() -> Result<i32, String> {
-    // TODO reformat to use try! or '?'
-    let home_dir = match env::home_dir() {
-        None =>  return Err("Unable to determine home directory. Please file an issue at https://github.com/jdormit/open-read-later-rust/issues/new".to_string()),
-        Some(home_dir) => home_dir
-    };
+fn run() -> Result<i32, Box<Error>> {
+    let home_dir = env::home_dir().ok_or("Cannot find home directory")?;
     let mut default_list_file = home_dir;
     default_list_file.push(".read_later_list");
 
@@ -49,22 +46,15 @@ fn run() -> Result<i32, String> {
                 .get_matches();
 
     let list_file_path = matches.value_of("file").unwrap();
-    let list_file_result = OpenOptions::new()
+    let mut list_file= OpenOptions::new()
         .read(true)
         .write(true)
         .create(true)
-        .open(list_file_path);
-    let mut list_file = match list_file_result {
-        Err(err) => return Err(format!("Error opening list file: {}. Please file an issue at https://github.com/jdormit/open-read-later-rust/issues/new", err)),
-        Ok(mut list_file) => list_file
-    };
+        .open(list_file_path)?;
+
     let mut list_text = String::new();
-    list_file.read_to_string(&mut list_text);
+    list_file.read_to_string(&mut list_text)?;
 
-    let read_later_list = match ReadLaterList::parse(&list_text) {
-        Err(err) => return Err(format!("Error opening list file: {}. Please file an issue at https://github.com/jdormit/open-read-later-rust/issues/new", err)),
-        Ok(read_later_list) => read_later_list
-    };
-
-    Ok(1)
+    let read_later_list = ReadLaterList::parse(&list_text)?;
+    Ok(0)
 }
