@@ -8,16 +8,22 @@ use open_read_later::read_later_list::ReadLaterList;
 use clap::{Arg, App, SubCommand};
 
 fn main() {
-    // TODO refactor to prevent excessive nesting
-    match env::home_dir() {
-        None => {
-            println!("Unable to determine home directory. Please file an issue at https://github.com/jdormit/open-read-later-rust/issues/new");
-        },
-        Some(home_dir) => {
-            let mut default_list_file = home_dir;
-            default_list_file.push(".read_later_list");
+    match run() {
+        Err(err) => println!("{}", err),
+        Ok(_) => return
+    }
+}
 
-            let matches = App::new("readlater")
+fn run() -> Result<i32, String> {
+    // TODO reformat to use try! or '?'
+    let home_dir = match env::home_dir() {
+        None =>  return Err("Unable to determine home directory. Please file an issue at https://github.com/jdormit/open-read-later-rust/issues/new".to_string()),
+        Some(home_dir) => home_dir
+    };
+    let mut default_list_file = home_dir;
+    default_list_file.push(".read_later_list");
+
+    let matches = App::new("readlater")
                 .version(env!("CARGO_PKG_VERSION"))
                 .author("Jeremy Dormitzer <jeremy.dormitzer@gmail.com>")
                 .about("Stores, queries, and manipulates read-later lists in the Open Read-Later specification format")
@@ -42,29 +48,23 @@ fn main() {
                             .about("deletes a link entry"))
                 .get_matches();
 
-            let list_file_path = matches.value_of("file").unwrap();
-            let list_file_result = OpenOptions::new()
-                .read(true)
-                .write(true)
-                .create(true)
-                .open(list_file_path);
-            match list_file_result {
-                Err(err) => println!("Error opening list file: {}. Please file an issue at https://github.com/jdormit/open-read-later-rust/issues/new", err),
-                Ok(mut list_file) => {
-                    let mut list_text = String::new();
-                    match list_file.read_to_string(&mut list_text) {
-                        Err(err) => println!("Error reading list file: {}. Please file an issue at https://github.com/jdormit/open-read-later-rust/issues/new", err),
-                        Ok(_) => {
-                            match ReadLaterList::parse(&list_text) {
-                                Err(err) => println!("Error opening list file: {}. Please file an issue at https://github.com/jdormit/open-read-later-rust/issues/new", err),
-                                Ok(read_later_list) => {
-                                    
-                                }
-                            }
-                        }
-                    }
-                }
-            }
-        }
-    }
+    let list_file_path = matches.value_of("file").unwrap();
+    let list_file_result = OpenOptions::new()
+        .read(true)
+        .write(true)
+        .create(true)
+        .open(list_file_path);
+    let mut list_file = match list_file_result {
+        Err(err) => return Err(format!("Error opening list file: {}. Please file an issue at https://github.com/jdormit/open-read-later-rust/issues/new", err)),
+        Ok(mut list_file) => list_file
+    };
+    let mut list_text = String::new();
+    list_file.read_to_string(&mut list_text);
+
+    let read_later_list = match ReadLaterList::parse(&list_text) {
+        Err(err) => return Err(format!("Error opening list file: {}. Please file an issue at https://github.com/jdormit/open-read-later-rust/issues/new", err)),
+        Ok(read_later_list) => read_later_list
+    };
+
+    Ok(1)
 }
