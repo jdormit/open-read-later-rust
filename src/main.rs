@@ -41,7 +41,7 @@ fn run() -> Result<i32, Box<Error>> {
     let read_later_list = ReadLaterList::parse(&list_text)?;
 
     match args.subcommand() {
-        ("list", Some(list_args)) => { list(&read_later_list, list_args); },
+        ("list", Some(list_args)) => list(&read_later_list, list_args),
         _ => {
             args.usage();
         }
