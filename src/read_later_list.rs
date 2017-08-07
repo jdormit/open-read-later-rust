@@ -133,7 +133,7 @@ impl ReadLaterList {
         ReadLaterList { links: HashMap::new() }
     }
 
-    pub fn parse(text: &str) -> Result<ReadLaterList, String> {
+    pub fn parse<'a>(text: &str) -> Result<ReadLaterList, String> {
         match text.trim() {
             "" => Ok(ReadLaterList::new()),
             _ => {
@@ -142,7 +142,7 @@ impl ReadLaterList {
                     |read_later_list_result, link_text| {
                         match read_later_list_result {
                             Err(msg) => Err(msg),
-                            Ok(read_later_list) => {
+                            Ok(mut read_later_list) => {
                                 match LinkEntry::parse(link_text) {
                                     Err(msg) => Err(msg),
                                     Ok(link_entry) => Ok(read_later_list.add_link(link_entry)),
@@ -159,23 +159,24 @@ impl ReadLaterList {
         self.links.len()
     }
 
-    pub fn add_link(mut self, link: LinkEntry) -> ReadLaterList {
+    // TODO these calls to clone() seem janky
+    pub fn add_link(&mut self, link: LinkEntry) -> ReadLaterList {
         self.links.insert(link.url.clone(), link);
-        self
+        self.clone()
     }
 
     pub fn get_link(&self, url: &str) -> Option<&LinkEntry> {
         self.links.get(url)
     }
 
-    pub fn update_link(mut self, new_link: LinkEntry) -> ReadLaterList {
+    pub fn update_link(&mut self, new_link: LinkEntry) -> ReadLaterList {
         self.links.insert(new_link.url.clone(), new_link);
-        self
+        self.clone()
     }
 
-    pub fn delete_link(mut self, url: &str) -> ReadLaterList {
+    pub fn delete_link(&mut self, url: &str) -> ReadLaterList {
         self.links.remove(url);
-        self
+        self.clone()
     }
 }
 
