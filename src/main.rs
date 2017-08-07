@@ -45,7 +45,7 @@ fn run() -> Result<i32, Box<Error>> {
         _ => {
             args.usage();
         }
-    }
+    };
 
     Ok(0)
 }
