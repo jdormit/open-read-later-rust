@@ -42,9 +42,7 @@ fn run() -> Result<i32, Box<Error>> {
 
     match args.subcommand() {
         ("list", Some(list_args)) => list(&read_later_list, list_args),
-        _ => {
-            args.usage();
-        }
+        _ => println!("{}", args.usage()),
     };
 
     list_file.write(&read_later_list.to_string().into_bytes())?;
