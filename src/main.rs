@@ -6,7 +6,7 @@ use std::error::Error;
 use std::io::Read;
 use std::fs::OpenOptions;
 use open_read_later::read_later_list::ReadLaterList;
-use clap::{Arg, App, SubCommand};
+use clap::{Arg, App, SubCommand, ArgMatches};
 
 fn main() {
     match run() {
@@ -63,20 +63,22 @@ fn run() -> Result<i32, Box<Error>> {
     let read_later_list = ReadLaterList::parse(&list_text)?;
 
     match args.subcommand() {
-        ("list", Some(list_args)) => {
-            match read_later_list.len() {
-                0 => {
-                    println!("Read-later list empty");
-                }
-                _ => {
-                    println!("{}", read_later_list);
-                }
-            }
-        }
+        ("list", Some(list_args)) => { list(&read_later_list, list_args); },
         _ => {
             args.usage();
         }
     }
 
     Ok(0)
+}
+
+fn list(read_later_list: &ReadLaterList, list_args: &ArgMatches) {
+    match read_later_list.len() {
+        0 => {
+            println!("Read-later list empty");
+        }
+        _ => {
+            println!("{}", read_later_list);
+        }
+    }
 }
