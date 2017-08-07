@@ -45,6 +45,7 @@ fn run() -> Result<i32, Box<Error>> {
     match args.subcommand() {
         ("list", Some(list_args)) => list(&read_later_list, list_args),
         ("save", Some(save_args)) => save(&mut read_later_list, save_args)?,
+        ("show", Some(show_args)) => show(&read_later_list, show_args),
         _ => println!("{}", args.usage()),
     };
 
@@ -90,7 +91,12 @@ fn parse_args<'a>(default_list_file: &'a PathBuf) -> ArgMatches<'a> {
         .subcommand(SubCommand::with_name("search")
                     .about("searches link entries by keyword"))
         .subcommand(SubCommand::with_name("show")
-                    .about("shows a link entry"))
+                    .about("shows a link entry")
+                    .arg(Arg::with_name("url")
+                         .help("the URL of the link to show")
+                         .takes_value(true)
+                         .value_name("URL")
+                         .required(true)))
         .subcommand(SubCommand::with_name("delete")
                     .about("deletes a link entry"))
         .get_matches()
@@ -130,4 +136,12 @@ fn save(read_later_list: &mut ReadLaterList, save_args: &ArgMatches) ->  Result<
         .build()?;
     read_later_list.add_link(link_entry);
     Ok(())
+}
+
+fn show(read_later_list: &ReadLaterList, args: &ArgMatches) {
+    let url = args.value_of("url").unwrap();
+    match read_later_list.get_link(url) {
+        None => println!("Link {} not found", url),
+        Some(link_entry) => println!("{}", link_entry)
+    }
 }
