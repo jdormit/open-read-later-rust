@@ -3,7 +3,7 @@ extern crate clap;
 
 use std::env;
 use std::error::Error;
-use std::io::Read;
+use std::io::{Read, Write};
 use std::path::PathBuf;
 use std::fs::OpenOptions;
 use open_read_later::read_later_list::ReadLaterList;
@@ -46,6 +46,8 @@ fn run() -> Result<i32, Box<Error>> {
             args.usage();
         }
     };
+
+    list_file.write(&read_later_list.to_string().into_bytes())?;
 
     Ok(0)
 }
