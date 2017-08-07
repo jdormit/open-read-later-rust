@@ -134,7 +134,7 @@ impl ReadLaterList {
     }
 
     pub fn parse(text: &str) -> Result<ReadLaterList, String> {
-        match text {
+        match text.trim() {
             "" => Ok(ReadLaterList::new()),
             _ => {
                 text.split("\n---\n").fold(
