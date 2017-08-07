@@ -117,15 +117,22 @@ impl ReadLaterList {
     }
 
     pub fn parse(text: &str) -> Result<ReadLaterList, String> {
-        text.split("\n---\n")
-            .fold(Ok(ReadLaterList::new()),
-                  |read_later_list_result, link_text| match read_later_list_result {
-                      Err(msg) => Err(msg),
-                      Ok(read_later_list) => match LinkEntry::parse(link_text) {
+        match text {
+            "" => Ok(ReadLaterList::new()),
+            _ => text.split("\n---\n")
+                .fold(Ok(ReadLaterList::new()),
+                      |read_later_list_result, link_text| match read_later_list_result {
                           Err(msg) => Err(msg),
-                          Ok(link_entry) => Ok(read_later_list.add_link(link_entry)),
-                      }
-                  })
+                          Ok(read_later_list) => match LinkEntry::parse(link_text) {
+                              Err(msg) => Err(msg),
+                              Ok(link_entry) => Ok(read_later_list.add_link(link_entry)),
+                          }
+                      })
+        }
+    }
+
+    pub fn len(&self) -> usize {
+        self.links.len()
     }
 
     pub fn add_link(mut self, link: LinkEntry) -> ReadLaterList {

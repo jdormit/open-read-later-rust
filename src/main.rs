@@ -20,7 +20,7 @@ fn run() -> Result<i32, Box<Error>> {
     let mut default_list_file = home_dir;
     default_list_file.push(".read_later_list");
 
-    let matches = App::new("readlater")
+    let args = App::new("readlater")
                 .version(env!("CARGO_PKG_VERSION"))
                 .author("Jeremy Dormitzer <jeremy.dormitzer@gmail.com>")
                 .about("Stores, queries, and manipulates read-later lists in the Open Read-Later specification format")
@@ -45,7 +45,7 @@ fn run() -> Result<i32, Box<Error>> {
                             .about("deletes a link entry"))
                 .get_matches();
 
-    let list_file_path = matches.value_of("file").unwrap();
+    let list_file_path = args.value_of("read_later_file").unwrap();
     let mut list_file= OpenOptions::new()
         .read(true)
         .write(true)
@@ -56,5 +56,22 @@ fn run() -> Result<i32, Box<Error>> {
     list_file.read_to_string(&mut list_text)?;
 
     let read_later_list = ReadLaterList::parse(&list_text)?;
+
+    match args.subcommand() {
+        ("list", Some(list_args)) => {
+            match read_later_list.len() {
+                0 => {
+                    println!("Read-later list empty");
+                },
+                _ => {
+                    println!("{}", read_later_list);
+                }
+            }
+        },
+        _ => {
+            args.usage();
+        }
+    }
+
     Ok(0)
 }
