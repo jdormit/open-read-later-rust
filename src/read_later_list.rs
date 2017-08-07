@@ -43,26 +43,32 @@ impl LinkEntryBuilder {
     }
 
     pub fn add_tags(mut self, tags: &mut Vec<&str>) -> LinkEntryBuilder {
-        self.tags.append(&mut tags.iter().map(|&s| String::from(s)).collect::<Vec<String>>());
+        self.tags.append(&mut tags.iter()
+            .map(|&s| String::from(s))
+            .collect::<Vec<String>>());
         self
     }
 
     pub fn build(self) -> Result<LinkEntry, String> {
         match self.url {
             None => Err(String::from("URL not set")),
-            Some(url) => match self.title {
-                None => Err(String::from("title not set")),
-                Some(title) => match self.tags.len() {
-                    0 => Ok(LinkEntry {
-                        url: url,
-                        title: title,
-                        tags: Vec::new(),
-                    }),
-                    _ => Ok(LinkEntry {
-                        url: url,
-                        title: title,
-                        tags: self.tags,
-                    }),
+            Some(url) => {
+                match self.title {
+                    None => Err(String::from("title not set")),
+                    Some(title) => {
+                        match self.tags.len() {
+                            0 => Ok(LinkEntry {
+                                url: url,
+                                title: title,
+                                tags: Vec::new(),
+                            }),
+                            _ => Ok(LinkEntry {
+                                url: url,
+                                title: title,
+                                tags: self.tags,
+                            }),
+                        }
+                    }
                 }
             }
         }
@@ -79,28 +85,41 @@ impl LinkEntry {
             static ref RE: Regex = Regex::new(r"^(.+?)\s*:\s*(.+)$").unwrap();
         }
         text.lines()
-            .fold(LinkEntryBuilder::new(), |builder, line| match RE.captures(&line) {
+            .fold(LinkEntryBuilder::new(), |builder, line| match RE.captures(
+                &line,
+            ) {
                 None => builder,
-                Some(cap) => match cap[1].trim() {
-                    "url" => builder.set_url(cap[2].trim()),
-                    "title" => builder.set_title(cap[2].trim()),
-                    "tags" => builder.add_tags(&mut cap[2]
-                                               .trim()
-                                               .split(",")
-                                               .map(|s| s.trim())
-                                               .collect::<Vec<&str>>()),
-                    _ => builder
+                Some(cap) => {
+                    match cap[1].trim() {
+                        "url" => builder.set_url(cap[2].trim()),
+                        "title" => builder.set_title(cap[2].trim()),
+                        "tags" => {
+                            builder.add_tags(&mut cap[2]
+                                .trim()
+                                .split(",")
+                                .map(|s| s.trim())
+                                .collect::<Vec<&str>>())
+                        }
+                        _ => builder,
+                    }
                 }
-            }).build()
+            })
+            .build()
     }
 }
 
 impl fmt::Display for LinkEntry {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        write!(f, "url: {}\ntitle: {}{}", self.url, self.title, match self.tags.len() {
-            0 => String::from(""),
-            _ => String::from("\ntags: ") + &self.tags.join(", ")
-        })
+        write!(
+            f,
+            "url: {}\ntitle: {}{}",
+            self.url,
+            self.title,
+            match self.tags.len() {
+                0 => String::from(""),
+                _ => String::from("\ntags: ") + &self.tags.join(", "),
+            }
+        )
     }
 }
 
@@ -111,23 +130,28 @@ pub struct ReadLaterList {
 
 impl ReadLaterList {
     pub fn new() -> ReadLaterList {
-        ReadLaterList {
-            links: HashMap::new()
-        }
+        ReadLaterList { links: HashMap::new() }
     }
 
     pub fn parse(text: &str) -> Result<ReadLaterList, String> {
         match text {
             "" => Ok(ReadLaterList::new()),
-            _ => text.split("\n---\n")
-                .fold(Ok(ReadLaterList::new()),
-                      |read_later_list_result, link_text| match read_later_list_result {
-                          Err(msg) => Err(msg),
-                          Ok(read_later_list) => match LinkEntry::parse(link_text) {
-                              Err(msg) => Err(msg),
-                              Ok(link_entry) => Ok(read_later_list.add_link(link_entry)),
-                          }
-                      })
+            _ => {
+                text.split("\n---\n").fold(
+                    Ok(ReadLaterList::new()),
+                    |read_later_list_result, link_text| {
+                        match read_later_list_result {
+                            Err(msg) => Err(msg),
+                            Ok(read_later_list) => {
+                                match LinkEntry::parse(link_text) {
+                                    Err(msg) => Err(msg),
+                                    Ok(link_entry) => Ok(read_later_list.add_link(link_entry)),
+                                }
+                            }
+                        }
+                    },
+                )
+            }
         }
     }
 
@@ -157,7 +181,8 @@ impl ReadLaterList {
 
 impl fmt::Display for ReadLaterList {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        let mut vals = self.links.values()
+        let mut vals = self.links
+            .values()
             .map(|link| link.to_string())
             .collect::<Vec<String>>();
         vals.sort();

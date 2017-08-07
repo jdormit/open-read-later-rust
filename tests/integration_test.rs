@@ -14,18 +14,20 @@ title: Jeremy";
 
     let read_later_list_parsed = ReadLaterList::parse(read_later_text);
     let read_later_list_constructed = ReadLaterList::new()
-        .add_link(LinkEntry::builder()
-                  .set_url("https://example.com")
-                  .set_title("Example")
-                  .add_tags(&mut vec!["tag1", "tag2"])
-                  .build()
-                  .unwrap()
+        .add_link(
+            LinkEntry::builder()
+                .set_url("https://example.com")
+                .set_title("Example")
+                .add_tags(&mut vec!["tag1", "tag2"])
+                .build()
+                .unwrap(),
         )
-        .add_link(LinkEntry::builder()
-                  .set_url("https://jeremydormitzer.com")
-                  .set_title("Jeremy")
-                  .build()
-                  .unwrap()
+        .add_link(
+            LinkEntry::builder()
+                .set_url("https://jeremydormitzer.com")
+                .set_title("Jeremy")
+                .build()
+                .unwrap(),
         );
 
     assert!(read_later_list_parsed.is_ok());
@@ -44,18 +46,20 @@ title: Jeremy";
 
     let read_later_list_parsed = ReadLaterList::parse(read_later_text);
     let read_later_list_constructed = ReadLaterList::new()
-        .add_link(LinkEntry::builder()
-                  .set_url("https://example.com")
-                  .set_title("Example")
-                  .add_tags(&mut vec!["tag1", "tag2"])
-                  .build()
-                  .unwrap()
+        .add_link(
+            LinkEntry::builder()
+                .set_url("https://example.com")
+                .set_title("Example")
+                .add_tags(&mut vec!["tag1", "tag2"])
+                .build()
+                .unwrap(),
         )
-        .add_link(LinkEntry::builder()
-                  .set_url("https://jeremydormitzer.com")
-                  .set_title("Jeremy")
-                  .build()
-                  .unwrap()
+        .add_link(
+            LinkEntry::builder()
+                .set_url("https://jeremydormitzer.com")
+                .set_title("Jeremy")
+                .build()
+                .unwrap(),
         );
 
     assert_eq!(read_later_list_parsed.unwrap().to_string(), read_later_text);

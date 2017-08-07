@@ -10,8 +10,13 @@ use clap::{Arg, App, SubCommand};
 
 fn main() {
     match run() {
-        Err(err) => println!("Encountered error: {}. Please file an issue at https://github.com/jdormit/open-read-later-rust/issues/new", err),
-        Ok(_) => return
+        Err(err) => {
+            println!(
+                "Encountered error: {}. Please file an issue at https://github.com/jdormit/open-read-later-rust/issues/new",
+                err
+            )
+        }
+        Ok(_) => return,
     }
 }
 
@@ -46,7 +51,7 @@ fn run() -> Result<i32, Box<Error>> {
                 .get_matches();
 
     let list_file_path = args.value_of("read_later_file").unwrap();
-    let mut list_file= OpenOptions::new()
+    let mut list_file = OpenOptions::new()
         .read(true)
         .write(true)
         .create(true)
@@ -62,12 +67,12 @@ fn run() -> Result<i32, Box<Error>> {
             match read_later_list.len() {
                 0 => {
                     println!("Read-later list empty");
-                },
+                }
                 _ => {
                     println!("{}", read_later_list);
                 }
             }
-        },
+        }
         _ => {
             args.usage();
         }
