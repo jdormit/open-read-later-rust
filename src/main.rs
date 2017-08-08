@@ -34,7 +34,7 @@ fn run() -> Result<i32, Box<Error>> {
     let mut read_later_list = ReadLaterList::parse(&list_text)?;
 
     match args.subcommand() {
-        ("list", Some(list_args)) => list(&read_later_list, list_args),
+        ("list", Some(_)) => list(&read_later_list),
         ("save", Some(save_args)) => save(&mut read_later_list, save_args)?,
         ("show", Some(show_args)) => show(&read_later_list, show_args),
         ("delete", Some(delete_args)) => delete(&mut read_later_list, delete_args),
@@ -99,7 +99,7 @@ fn parse_args<'a>(default_list_file: &'a PathBuf) -> ArgMatches<'a> {
         .get_matches()
 }
 
-fn list(read_later_list: &ReadLaterList, list_args: &ArgMatches) {
+fn list(read_later_list: &ReadLaterList) {
     match read_later_list.len() {
         0 => {
             println!("Read-later list empty");
