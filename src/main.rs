@@ -5,11 +5,9 @@ mod util;
 
 use std::env;
 use std::error::Error;
-use std::io::{Read, Write};
 use std::path::PathBuf;
-use std::fs::OpenOptions;
 use open_read_later::read_later_list::{ReadLaterList, LinkEntry};
-use util::prompt;
+use util::{prompt, read_from_file, overwrite_file};
 use clap::{Arg, App, SubCommand, ArgMatches};
 
 fn main() {
@@ -31,14 +29,7 @@ fn run() -> Result<i32, Box<Error>> {
     let args = parse_args(&default_list_file);
 
     let list_file_path = args.value_of("read_later_file").unwrap();
-    let mut list_file = OpenOptions::new()
-        .read(true)
-        .write(true)
-        .create(true)
-        .open(list_file_path)?;
-
-    let mut list_text = String::new();
-    list_file.read_to_string(&mut list_text)?;
+    let list_text = read_from_file(list_file_path).unwrap_or(String::from(""));
 
     let mut read_later_list = ReadLaterList::parse(&list_text)?;
 
@@ -46,10 +37,11 @@ fn run() -> Result<i32, Box<Error>> {
         ("list", Some(list_args)) => list(&read_later_list, list_args),
         ("save", Some(save_args)) => save(&mut read_later_list, save_args)?,
         ("show", Some(show_args)) => show(&read_later_list, show_args),
+        ("delete", Some(delete_args)) => delete(&mut read_later_list, delete_args),
         _ => println!("{}", args.usage()),
     };
 
-    list_file.write(&read_later_list.to_string().into_bytes())?;
+    overwrite_file(list_file_path, &read_later_list.to_string())?;
 
     Ok(0)
 }
@@ -98,7 +90,12 @@ fn parse_args<'a>(default_list_file: &'a PathBuf) -> ArgMatches<'a> {
                          .value_name("URL")
                          .required(true)))
         .subcommand(SubCommand::with_name("delete")
-                    .about("deletes a link entry"))
+                    .about("deletes a link entry")
+                    .arg(Arg::with_name("url")
+                         .help("the URL of the link to delete")
+                         .takes_value(true)
+                         .value_name("URL")
+                         .required(true)))
         .get_matches()
 }
 
@@ -144,4 +141,9 @@ fn show(read_later_list: &ReadLaterList, args: &ArgMatches) {
         None => println!("Link {} not found", url),
         Some(link_entry) => println!("{}", link_entry)
     }
+}
+
+fn delete(read_later_list: &mut ReadLaterList, args: &ArgMatches) {
+    let url = args.value_of("url").unwrap();
+    read_later_list.delete_link(url);
 }
