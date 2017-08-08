@@ -124,15 +124,18 @@ fn save(read_later_list: &mut ReadLaterList, save_args: &ArgMatches) ->  Result<
         },
         Some(title) => String::from(title)
     };
-    let mut tags = match save_args.values_of("tags") {
-        // TODO add interactive dialog to add tags
-        None => Vec::new(),
-        Some(tags) => tags.collect()
+    let tags: Vec<String> = match save_args.values_of("tags") {
+        None => {
+            let mut buffer = String::new();
+            prompt("[Optional] Enter comma-separated tags: ", &mut buffer)?;
+            buffer.split(",").map(|tag| tag.trim()).map(String::from).collect()
+        }
+        Some(tags) => tags.map(String::from).collect()
     };
     let link_entry = LinkEntry::builder()
         .set_url(url)
         .set_title(&title)
-        .add_tags(&mut tags)
+        .add_tags(&mut tags.iter().map(|tag| tag.as_ref()).collect())
         .build()?;
     read_later_list.add_link(link_entry);
     Ok(())
