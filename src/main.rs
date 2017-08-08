@@ -77,8 +77,6 @@ fn parse_args<'a>(default_list_file: &'a PathBuf) -> ArgMatches<'a> {
                          .takes_value(true)
                          .value_name("TAGS")
                          .multiple(true)))
-        .subcommand(SubCommand::with_name("edit")
-                    .about("edits a link entry"))
         .subcommand(SubCommand::with_name("list")
                     .about("lists link entries"))
         .subcommand(SubCommand::with_name("search")
