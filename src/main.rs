@@ -42,7 +42,7 @@ fn run() -> Result<i32, Box<Error>> {
         ("save", Some(save_args)) => save(&mut read_later_list, save_args)?,
         ("show", Some(show_args)) => show(&read_later_list, show_args),
         ("delete", Some(delete_args)) => delete(&mut read_later_list, delete_args),
-        ("tag", Some(tags_args)) => tags(&mut read_later_list, tags_args)?,
+        ("tag", Some(tags_args)) => tag(&mut read_later_list, tags_args)?,
         _ => println!("{}", args.usage()),
     };
 
@@ -213,7 +213,7 @@ fn delete(read_later_list: &mut ReadLaterList, args: &ArgMatches) {
     read_later_list.delete_link(url);
 }
 
-fn tags(read_later_list: &mut ReadLaterList, args: &ArgMatches) -> Result<(), Box<Error>> {
+fn tag(read_later_list: &mut ReadLaterList, args: &ArgMatches) -> Result<(), Box<Error>> {
     match args.subcommand() {
         ("add", Some(add_args)) => {
             let url = add_args.value_of("url").unwrap();
