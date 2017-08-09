@@ -149,23 +149,45 @@ fn list(read_later_list: &ReadLaterList) {
 fn save(read_later_list: &mut ReadLaterList, save_args: &ArgMatches) -> Result<(), Box<Error>> {
     let url = save_args.value_of("url").unwrap();
     println!("Saving link {}", url);
+    let old_title = match read_later_list.get_link(url) {
+        None => String::from(""),
+        Some(link_entry) => format!("{}", link_entry.title)
+    };
+    let old_title_hint = format!(" [{}]", old_title);
+    let old_tags = match read_later_list.get_link(url) {
+        None => String::from(""),
+        Some(link_entry) => format!("{}", link_entry.tags.join(", "))
+    };
+    let old_tags_hint = format!(" [{}]", old_tags);
     let title = match save_args.value_of("title") {
         None => {
             let mut buffer = String::new();
-            prompt("Enter link title: ", &mut buffer)?;
-            buffer
+            prompt(&format!("Enter link title{}: ", old_title_hint), &mut buffer)?;
+            match buffer.trim().len() {
+                0 => old_title,
+                _ => String::from(buffer.trim())
+            }
         }
         Some(title) => String::from(title),
     };
     let tags: Vec<String> = match save_args.values_of("tags") {
         None => {
             let mut buffer = String::new();
-            prompt("[Optional] Enter comma-separated tags: ", &mut buffer)?;
-            buffer
+            prompt(&format!("[Optional] Enter comma-separated tags{}: ", old_tags_hint), &mut buffer)?;
+            let tag_vals: Vec<String> = buffer
                 .split(",")
                 .map(|tag| tag.trim())
                 .map(String::from)
-                .collect()
+                .filter(|tag| !(tag.trim() == ""))
+                .collect();
+            match tag_vals.len() {
+                0 => old_tags
+                    .split(",")
+                    .map(|tag| tag.trim())
+                    .map(String::from)
+                    .collect(),
+                _ => tag_vals
+            }
         }
         Some(tags) => tags.map(String::from).collect(),
     };

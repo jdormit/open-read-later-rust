@@ -7,9 +7,9 @@ use regex::Regex;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct LinkEntry {
-    url: String,
-    title: String,
-    tags: Vec<String>,
+    pub url: String,
+    pub title: String,
+    pub tags: Vec<String>,
 }
 
 pub struct LinkEntryBuilder {
