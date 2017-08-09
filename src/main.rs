@@ -10,7 +10,7 @@ use std::path::PathBuf;
 use open_read_later::read_later_list::{ReadLaterList, LinkEntry};
 use util::{prompt, read_from_file, overwrite_file};
 use clap::{Arg, App, SubCommand, ArgMatches};
-use regex::Regex;
+use regex::RegexBuilder;
 
 #[allow(unused_imports)]
 use util::trace;
@@ -257,7 +257,10 @@ fn tag(read_later_list: &mut ReadLaterList, args: &ArgMatches) -> Result<(), Box
 
 fn search(read_later_list: &ReadLaterList, args: &ArgMatches) {
     let keyword = args.value_of("keyword").unwrap();
-    let re = Regex::new(&regex::escape(keyword)).unwrap();
+    let re = RegexBuilder::new(&regex::escape(keyword))
+        .case_insensitive(true)
+        .build()
+        .unwrap();
     let results = read_later_list
         .iter_links()
         .filter(|link_entry| {
