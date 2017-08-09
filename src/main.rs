@@ -10,6 +10,9 @@ use open_read_later::read_later_list::{ReadLaterList, LinkEntry};
 use util::{prompt, read_from_file, overwrite_file};
 use clap::{Arg, App, SubCommand, ArgMatches};
 
+#[allow(unused_imports)]
+use util::trace;
+
 fn main() {
     match run() {
         Err(err) => {
