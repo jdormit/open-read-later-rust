@@ -1,4 +1,5 @@
 use std::io;
+use std::fmt::Debug;
 use std::io::{Read, Write, BufRead};
 use std::fs::OpenOptions;
 
@@ -27,4 +28,10 @@ pub fn overwrite_file(path: &str, text: &str) -> io::Result<usize> {
         .truncate(true)
         .open(path)?;
     file.write(text.as_bytes())
+}
+
+#[allow(dead_code)]
+pub fn trace<T: Debug>(label: &str, obj: T) -> T {
+    println!("{}: {:?}", label, obj);
+    obj
 }
