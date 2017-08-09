@@ -179,6 +179,46 @@ impl ReadLaterList {
         self.links.remove(url);
         self.clone()
     }
+
+    pub fn add_tags(&mut self, url: &str, tags: Vec<String>) -> Result<ReadLaterList, String> {
+        match self.clone().links.get(url) {
+            None => return Err(format!("Link {} does not exist", url)),
+            Some(link_entry) => {
+                let new_link = LinkEntryBuilder::new()
+                    .set_title(&link_entry.title)
+                    .set_url(&link_entry.url)
+                    .add_tags(&mut link_entry.tags
+                              .iter()
+                              .chain(tags
+                                     .iter()
+                                     .filter(|tag| !link_entry.tags.contains(tag)))
+                              .map(|tag| tag.as_ref())
+                              .collect::<Vec<&str>>())
+                    .build()
+                    .unwrap();
+                Ok(self.update_link(new_link))
+            }
+        }
+    }
+
+    pub fn remove_tags(&mut self, url: &str, tags: Vec<String>) -> Result<ReadLaterList, String> {
+        match self.clone().links.get(url) {
+            None => return Err(format!("Link {} does not exist", url)),
+            Some(link_entry) => {
+                let new_link = LinkEntryBuilder::new()
+                    .set_title(&link_entry.title)
+                    .set_url(&link_entry.url)
+                    .add_tags(&mut link_entry.tags
+                              .iter()
+                              .filter(|tag| !tags.contains(tag))
+                              .map(|tag| tag.as_ref())
+                              .collect::<Vec<&str>>())
+                    .build()
+                    .unwrap();
+                Ok(self.update_link(new_link))
+            }
+        }
+    }
 }
 
 impl fmt::Display for ReadLaterList {

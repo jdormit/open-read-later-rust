@@ -38,6 +38,7 @@ fn run() -> Result<i32, Box<Error>> {
         ("save", Some(save_args)) => save(&mut read_later_list, save_args)?,
         ("show", Some(show_args)) => show(&read_later_list, show_args),
         ("delete", Some(delete_args)) => delete(&mut read_later_list, delete_args),
+        ("tags", Some(tags_args)) => tags(&mut read_later_list, tags_args)?,
         _ => println!("{}", args.usage()),
     };
 
@@ -180,4 +181,27 @@ fn show(read_later_list: &ReadLaterList, args: &ArgMatches) {
 fn delete(read_later_list: &mut ReadLaterList, args: &ArgMatches) {
     let url = args.value_of("url").unwrap();
     read_later_list.delete_link(url);
+}
+
+fn tags(read_later_list: &mut ReadLaterList, args: &ArgMatches) -> Result<(), Box<Error>> {
+    match args.subcommand() {
+        ("add", Some(add_args)) => {
+            let url = add_args.value_of("url").unwrap();
+            let tags = add_args.values_of("tags").unwrap();
+            match read_later_list.get_link(url) {
+                None => println!("Link {} not found", url),
+                Some(_) => { read_later_list.add_tags(url, tags.map(String::from).collect())?; }
+            }
+        },
+        ("remove", Some(remove_args)) => {
+            let url = remove_args.value_of("url").unwrap();
+            let tags = remove_args.values_of("tags").unwrap();
+            match read_later_list.get_link(url) {
+                None => println!("Link {} not found", url),
+                Some(_) => { read_later_list.remove_tags(url, tags.map(String::from).collect())?; }
+            }
+        },
+        _ => println!("{}", args.usage())
+    };
+    Ok(())
 }
