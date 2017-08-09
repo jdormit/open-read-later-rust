@@ -86,7 +86,15 @@ title: Jeremy
 tags: The coolest, amazing, best";
 
     let mut read_later_list = ReadLaterList::parse(read_later_text).unwrap();
-    read_later_list.add_tags("https://jeremydormitzer.com", vec!["The coolest", "amazing", "best"].iter().map(|&tag| String::from(tag)).collect()).unwrap();
+    read_later_list
+        .add_tags(
+            "https://jeremydormitzer.com",
+            vec!["The coolest", "amazing", "best"]
+                .iter()
+                .map(|&tag| String::from(tag))
+                .collect(),
+        )
+        .unwrap();
 
     let read_later_list_constructed = ReadLaterList::new()
         .add_link(
@@ -128,7 +136,15 @@ url: https://jeremydormitzer.com
 title: Jeremy";
 
     let mut read_later_list = ReadLaterList::parse(read_later_text).unwrap();
-    read_later_list.remove_tags("https://example.com", vec!["tag1", "tag2"].iter().map(|&tag| String::from(tag)).collect()).unwrap();
+    read_later_list
+        .remove_tags(
+            "https://example.com",
+            vec!["tag1", "tag2"]
+                .iter()
+                .map(|&tag| String::from(tag))
+                .collect(),
+        )
+        .unwrap();
 
     let read_later_list_constructed = ReadLaterList::new()
         .add_link(

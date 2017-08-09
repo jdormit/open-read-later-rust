@@ -154,27 +154,30 @@ fn save(read_later_list: &mut ReadLaterList, save_args: &ArgMatches) -> Result<(
     println!("Saving link {}", url);
     let old_title = match read_later_list.get_link(url) {
         None => String::from(""),
-        Some(link_entry) => format!("{}", link_entry.title)
+        Some(link_entry) => format!("{}", link_entry.title),
     };
     let old_title_hint = match old_title.len() {
         0 => String::from(""),
-        _ => format!(" [{}]", old_title)
+        _ => format!(" [{}]", old_title),
     };
     let old_tags = match read_later_list.get_link(url) {
         None => String::from(""),
-        Some(link_entry) => format!("{}", link_entry.tags.join(", "))
+        Some(link_entry) => format!("{}", link_entry.tags.join(", ")),
     };
     let old_tags_hint = match old_tags.len() {
         0 => String::from(""),
-        _ => format!(" [{}]", old_tags)
+        _ => format!(" [{}]", old_tags),
     };
     let title = match save_args.value_of("title") {
         None => {
             let mut buffer = String::new();
-            prompt(&format!("Enter link title{}: ", old_title_hint), &mut buffer)?;
+            prompt(
+                &format!("Enter link title{}: ", old_title_hint),
+                &mut buffer,
+            )?;
             match buffer.trim().len() {
                 0 => old_title,
-                _ => String::from(buffer.trim())
+                _ => String::from(buffer.trim()),
             }
         }
         Some(title) => String::from(title),
@@ -182,7 +185,10 @@ fn save(read_later_list: &mut ReadLaterList, save_args: &ArgMatches) -> Result<(
     let tags: Vec<String> = match save_args.values_of("tags") {
         None => {
             let mut buffer = String::new();
-            prompt(&format!("[Optional] Enter comma-separated tags{}: ", old_tags_hint), &mut buffer)?;
+            prompt(
+                &format!("[Optional] Enter comma-separated tags{}: ", old_tags_hint),
+                &mut buffer,
+            )?;
             let tag_vals: Vec<String> = buffer
                 .split(",")
                 .map(|tag| tag.trim())
@@ -190,12 +196,14 @@ fn save(read_later_list: &mut ReadLaterList, save_args: &ArgMatches) -> Result<(
                 .filter(|tag| !(tag.trim() == ""))
                 .collect();
             match tag_vals.len() {
-                0 => old_tags
-                    .split(",")
-                    .map(|tag| tag.trim())
-                    .map(String::from)
-                    .collect(),
-                _ => tag_vals
+                0 => {
+                    old_tags
+                        .split(",")
+                        .map(|tag| tag.trim())
+                        .map(String::from)
+                        .collect()
+                }
+                _ => tag_vals,
             }
         }
         Some(tags) => tags.map(String::from).collect(),
@@ -203,7 +211,10 @@ fn save(read_later_list: &mut ReadLaterList, save_args: &ArgMatches) -> Result<(
     let link_entry = LinkEntry::builder()
         .set_url(url)
         .set_title(&title)
-        .add_tags(&mut tags.iter().filter(|tag| tag.trim() != "").map(|tag| tag.as_ref()).collect())
+        .add_tags(&mut tags.iter()
+            .filter(|tag| tag.trim() != "")
+            .map(|tag| tag.as_ref())
+            .collect())
         .build()?;
     read_later_list.add_link(link_entry);
     Ok(())
@@ -264,8 +275,7 @@ fn search(read_later_list: &ReadLaterList, args: &ArgMatches) {
     let results = read_later_list
         .iter_links()
         .filter(|link_entry| {
-            re.is_match(&link_entry.url) ||
-                re.is_match(&link_entry.title) ||
+            re.is_match(&link_entry.url) || re.is_match(&link_entry.title) ||
                 re.is_match(&link_entry.tags.join(", "))
         })
         .map(|link| link.clone())
@@ -273,6 +283,6 @@ fn search(read_later_list: &ReadLaterList, args: &ArgMatches) {
     let results_list = ReadLaterList::new().add_links(results);
     match results_list.len() {
         0 => println!("No results found"),
-        _ => println!("{}", results_list)
+        _ => println!("{}", results_list),
     }
 }
