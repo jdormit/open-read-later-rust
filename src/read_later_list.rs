@@ -3,6 +3,7 @@ use std::result::Result;
 use std::vec::Vec;
 use std::string::String;
 use std::collections::HashMap;
+use std::collections::hash_map::Values;
 use regex::Regex;
 
 #[derive(Debug, Clone, PartialEq)]
@@ -159,10 +160,21 @@ impl ReadLaterList {
         self.links.len()
     }
 
+    pub fn iter_links(&self) -> Values<String, LinkEntry> {
+        self.links.values()
+    }
+
     // TODO these calls to clone() seem janky
     // TODO return error if collision occurs
     pub fn add_link(&mut self, link: LinkEntry) -> ReadLaterList {
         self.links.insert(link.url.clone(), link);
+        self.clone()
+    }
+
+    pub fn add_links(&mut self, links: Vec<LinkEntry>) -> ReadLaterList {
+        for link in links {
+            self.links.insert(link.url.clone(), link);
+        }
         self.clone()
     }
 

@@ -1,5 +1,6 @@
 extern crate open_read_later;
 extern crate clap;
+extern crate regex;
 
 mod util;
 
@@ -9,6 +10,7 @@ use std::path::PathBuf;
 use open_read_later::read_later_list::{ReadLaterList, LinkEntry};
 use util::{prompt, read_from_file, overwrite_file};
 use clap::{Arg, App, SubCommand, ArgMatches};
+use regex::Regex;
 
 #[allow(unused_imports)]
 use util::trace;
@@ -43,6 +45,7 @@ fn run() -> Result<i32, Box<Error>> {
         ("show", Some(show_args)) => show(&read_later_list, show_args),
         ("delete", Some(delete_args)) => delete(&mut read_later_list, delete_args),
         ("tag", Some(tags_args)) => tag(&mut read_later_list, tags_args)?,
+        ("search", Some(search_args)) => search(&read_later_list, search_args),
         _ => println!("{}", args.usage()),
     };
 
@@ -244,4 +247,23 @@ fn tag(read_later_list: &mut ReadLaterList, args: &ArgMatches) -> Result<(), Box
         _ => println!("{}", args.usage()),
     };
     Ok(())
+}
+
+fn search(read_later_list: &ReadLaterList, args: &ArgMatches) {
+    let keyword = args.value_of("keyword").unwrap();
+    let re = Regex::new(&regex::escape(keyword)).unwrap();
+    let results = read_later_list
+        .iter_links()
+        .filter(|link_entry| {
+            re.is_match(&link_entry.url) ||
+                re.is_match(&link_entry.title) ||
+                re.is_match(&link_entry.tags.join(", "))
+        })
+        .map(|link| link.clone())
+        .collect();
+    let results_list = ReadLaterList::new().add_links(results);
+    match results_list.len() {
+        0 => println!("No results found"),
+        _ => println!("{}", results_list)
+    }
 }
