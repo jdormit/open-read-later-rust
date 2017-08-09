@@ -164,8 +164,6 @@ impl ReadLaterList {
         self.links.values()
     }
 
-    // TODO these calls to clone() seem janky
-    // TODO return error if collision occurs
     pub fn add_link(&mut self, link: LinkEntry) -> ReadLaterList {
         self.links.insert(link.url.clone(), link);
         self.clone()
