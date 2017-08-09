@@ -39,7 +39,7 @@ fn run() -> Result<i32, Box<Error>> {
         ("save", Some(save_args)) => save(&mut read_later_list, save_args)?,
         ("show", Some(show_args)) => show(&read_later_list, show_args),
         ("delete", Some(delete_args)) => delete(&mut read_later_list, delete_args),
-        ("tags", Some(tags_args)) => tags(&mut read_later_list, tags_args)?,
+        ("tag", Some(tags_args)) => tags(&mut read_later_list, tags_args)?,
         _ => println!("{}", args.usage()),
     };
 
