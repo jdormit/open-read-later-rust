@@ -187,13 +187,12 @@ impl ReadLaterList {
                 let new_link = LinkEntryBuilder::new()
                     .set_title(&link_entry.title)
                     .set_url(&link_entry.url)
-                    .add_tags(&mut link_entry.tags
-                              .iter()
-                              .chain(tags
-                                     .iter()
-                                     .filter(|tag| !link_entry.tags.contains(tag)))
-                              .map(|tag| tag.as_ref())
-                              .collect::<Vec<&str>>())
+                    .add_tags(&mut link_entry
+                        .tags
+                        .iter()
+                        .chain(tags.iter().filter(|tag| !link_entry.tags.contains(tag)))
+                        .map(|tag| tag.as_ref())
+                        .collect::<Vec<&str>>())
                     .build()
                     .unwrap();
                 Ok(self.update_link(new_link))
@@ -208,11 +207,12 @@ impl ReadLaterList {
                 let new_link = LinkEntryBuilder::new()
                     .set_title(&link_entry.title)
                     .set_url(&link_entry.url)
-                    .add_tags(&mut link_entry.tags
-                              .iter()
-                              .filter(|tag| !tags.contains(tag))
-                              .map(|tag| tag.as_ref())
-                              .collect::<Vec<&str>>())
+                    .add_tags(&mut link_entry
+                        .tags
+                        .iter()
+                        .filter(|tag| !tags.contains(tag))
+                        .map(|tag| tag.as_ref())
+                        .collect::<Vec<&str>>())
                     .build()
                     .unwrap();
                 Ok(self.update_link(new_link))

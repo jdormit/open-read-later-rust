@@ -15,7 +15,8 @@ fn main() {
         Err(err) => {
             println!(
                 "Encountered error: {}. Please file an issue at https://github.com/jdormit/open-read-later-rust/issues/new",
-                err)
+                err
+            )
         }
         Ok(_) => return,
     }
@@ -142,7 +143,7 @@ fn list(read_later_list: &ReadLaterList) {
     }
 }
 
-fn save(read_later_list: &mut ReadLaterList, save_args: &ArgMatches) ->  Result<(), Box<Error>> {
+fn save(read_later_list: &mut ReadLaterList, save_args: &ArgMatches) -> Result<(), Box<Error>> {
     let url = save_args.value_of("url").unwrap();
     println!("Saving link {}", url);
     let title = match save_args.value_of("title") {
@@ -150,16 +151,20 @@ fn save(read_later_list: &mut ReadLaterList, save_args: &ArgMatches) ->  Result<
             let mut buffer = String::new();
             prompt("Enter link title: ", &mut buffer)?;
             buffer
-        },
-        Some(title) => String::from(title)
+        }
+        Some(title) => String::from(title),
     };
     let tags: Vec<String> = match save_args.values_of("tags") {
         None => {
             let mut buffer = String::new();
             prompt("[Optional] Enter comma-separated tags: ", &mut buffer)?;
-            buffer.split(",").map(|tag| tag.trim()).map(String::from).collect()
+            buffer
+                .split(",")
+                .map(|tag| tag.trim())
+                .map(String::from)
+                .collect()
         }
-        Some(tags) => tags.map(String::from).collect()
+        Some(tags) => tags.map(String::from).collect(),
     };
     let link_entry = LinkEntry::builder()
         .set_url(url)
@@ -174,7 +179,7 @@ fn show(read_later_list: &ReadLaterList, args: &ArgMatches) {
     let url = args.value_of("url").unwrap();
     match read_later_list.get_link(url) {
         None => println!("Link {} not found", url),
-        Some(link_entry) => println!("{}", link_entry)
+        Some(link_entry) => println!("{}", link_entry),
     }
 }
 
@@ -190,18 +195,28 @@ fn tags(read_later_list: &mut ReadLaterList, args: &ArgMatches) -> Result<(), Bo
             let tags = add_args.values_of("tags").unwrap();
             match read_later_list.get_link(url) {
                 None => println!("Link {} not found", url),
-                Some(_) => { read_later_list.add_tags(url, tags.map(String::from).collect())?; }
+                Some(_) => {
+                    read_later_list.add_tags(
+                        url,
+                        tags.map(String::from).collect(),
+                    )?;
+                }
             }
-        },
+        }
         ("remove", Some(remove_args)) => {
             let url = remove_args.value_of("url").unwrap();
             let tags = remove_args.values_of("tags").unwrap();
             match read_later_list.get_link(url) {
                 None => println!("Link {} not found", url),
-                Some(_) => { read_later_list.remove_tags(url, tags.map(String::from).collect())?; }
+                Some(_) => {
+                    read_later_list.remove_tags(
+                        url,
+                        tags.map(String::from).collect(),
+                    )?;
+                }
             }
-        },
-        _ => println!("{}", args.usage())
+        }
+        _ => println!("{}", args.usage()),
     };
     Ok(())
 }

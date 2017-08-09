@@ -2,7 +2,7 @@ use std::io;
 use std::io::{Read, Write, BufRead};
 use std::fs::OpenOptions;
 
-pub fn prompt(prompt: &str, buf:&mut String) -> io::Result<usize> {
+pub fn prompt(prompt: &str, buf: &mut String) -> io::Result<usize> {
     let stdout = io::stdout();
     let mut stdout_handle = stdout.lock();
     stdout_handle.write(prompt.as_bytes())?;
@@ -14,9 +14,7 @@ pub fn prompt(prompt: &str, buf:&mut String) -> io::Result<usize> {
 }
 
 pub fn read_from_file(path: &str) -> io::Result<String> {
-    let mut file = OpenOptions::new()
-        .read(true)
-        .open(path)?;
+    let mut file = OpenOptions::new().read(true).open(path)?;
     let mut text = String::new();
     file.read_to_string(&mut text)?;
     Ok(text)
