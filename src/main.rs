@@ -64,7 +64,7 @@ fn parse_args<'a>(default_list_file: &'a PathBuf) -> ArgMatches<'a> {
              .takes_value(true)
              .default_value(default_list_file.to_str().unwrap()))
         .subcommand(SubCommand::with_name("save")
-                    .about("saves a link entry")
+                    .about("saves or updates a link entry")
                     .visible_aliases(&["update", "add"])
                     .arg(Arg::with_name("url")
                          .help("the URL of the link to save")
