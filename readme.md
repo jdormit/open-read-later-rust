@@ -36,4 +36,4 @@ SUBCOMMANDS:
 ```
 
 ## API Documentation
-`open-read-later-rust` provides an API to manipulate and query read-later lists programmatically. See [the API documentations](https://jdormit.github.io/open-read-later-rust) for details.
+`open-read-later-rust` provides an API to manipulate and query read-later lists programmatically. See [the API documentations](https://docs.rs/open_read_later/1.0.0/open_read_later) for details.
