@@ -2,6 +2,11 @@
 name = "open_read_later"
 version = "1.0.0"
 authors = ["Jeremy Dormitzer <jeremy.dormitzer@gmail.com>"]
+description = "An implementation of and CLI for the Open Read-Later list specification"
+repository = "https://github.com/jdormit/open-read-later-rust"
+keywords = ["link", "link saving", "open read later", "pocket"]
+categories = ["command-line-utilities", "command-line-interface"]
+license = "MIT"
 
 [lib]
 name = "open_read_later"
