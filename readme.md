@@ -5,7 +5,7 @@
 The `readlater` binary can be installed with [Cargo](http://doc.crates.io/):
 
 ```bash
-$ cargo install readlater
+$ cargo install open_read_later
 ```
 
 Usage:
