@@ -121,7 +121,7 @@ fn parse_args<'a>(default_list_file: &'a PathBuf) -> ArgMatches<'a> {
                                      .takes_value(true)
                                      .value_name("TAG")
                                      .multiple(true)
-                                     .min_values(1)))
+                                     .required(true)))
                     .subcommand(SubCommand::with_name("remove")
                                 .about("removes tags from a link")
                                 .arg(Arg::with_name("url")
@@ -134,7 +134,7 @@ fn parse_args<'a>(default_list_file: &'a PathBuf) -> ArgMatches<'a> {
                                      .takes_value(true)
                                      .value_name("TAG")
                                      .multiple(true)
-                                     .min_values(1))))
+                                     .required(true))))
         .get_matches()
 }
 
