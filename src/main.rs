@@ -295,7 +295,11 @@ fn tag(read_later_list: &mut ReadLaterList, args: &ArgMatches) -> Result<(), Box
     Ok(())
 }
 
-fn search(read_later_list: &ReadLaterList, args: &ArgMatches, json: bool) -> Result<(), Box<Error>> {
+fn search(
+    read_later_list: &ReadLaterList,
+    args: &ArgMatches,
+    json: bool,
+) -> Result<(), Box<Error>> {
     let keyword = args.value_of("keyword").unwrap();
     let re = RegexBuilder::new(&regex::escape(keyword))
         .case_insensitive(true)
