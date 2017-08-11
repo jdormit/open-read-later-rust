@@ -5,7 +5,6 @@ use std::string::String;
 use std::collections::HashMap;
 use std::collections::hash_map::Values;
 use regex::Regex;
-use serde::ser::Serialize;
 
 #[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct LinkEntry {

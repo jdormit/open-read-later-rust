@@ -1,6 +1,6 @@
 [package]
 name = "open_read_later"
-version = "1.1.0"
+version = "1.1.1"
 authors = ["Jeremy Dormitzer <jeremy.dormitzer@gmail.com>"]
 description = "An implementation of and CLI for the Open Read-Later list specification"
 repository = "https://github.com/jdormit/open-read-later-rust"
