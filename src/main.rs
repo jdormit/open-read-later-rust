@@ -1,6 +1,8 @@
 extern crate open_read_later;
 extern crate clap;
 extern crate regex;
+#[macro_use]
+extern crate serde_json;
 
 mod util;
 
@@ -34,18 +36,20 @@ fn run() -> Result<i32, Box<Error>> {
 
     let args = parse_args(&default_list_file);
 
+    let json = args.is_present("json");
+
     let list_file_path = args.value_of("read_later_file").unwrap();
     let list_text = read_from_file(list_file_path).unwrap_or(String::from(""));
 
     let mut read_later_list = ReadLaterList::parse(&list_text)?;
 
     match args.subcommand() {
-        ("list", Some(_)) => list(&read_later_list),
+        ("list", Some(_)) => list(&read_later_list, json)?,
         ("save", Some(save_args)) => save(&mut read_later_list, save_args)?,
-        ("show", Some(show_args)) => show(&read_later_list, show_args),
+        ("show", Some(show_args)) => show(&read_later_list, show_args, json)?,
         ("delete", Some(delete_args)) => delete(&mut read_later_list, delete_args),
         ("tag", Some(tags_args)) => tag(&mut read_later_list, tags_args)?,
-        ("search", Some(search_args)) => search(&read_later_list, search_args),
+        ("search", Some(search_args)) => search(&read_later_list, search_args, json)?,
         _ => println!("{}", args.usage()),
     };
 
@@ -66,6 +70,9 @@ fn parse_args<'a>(default_list_file: &'a PathBuf) -> ArgMatches<'a> {
              .help("specifies the location of the list file")
              .takes_value(true)
              .default_value(default_list_file.to_str().unwrap()))
+        .arg(Arg::with_name("json")
+             .long("json")
+             .help("serialize output as JSON"))
         .subcommand(SubCommand::with_name("save")
                     .about("saves or updates a link entry")
                     .visible_aliases(&["update", "add"])
@@ -138,15 +145,24 @@ fn parse_args<'a>(default_list_file: &'a PathBuf) -> ArgMatches<'a> {
         .get_matches()
 }
 
-fn list(read_later_list: &ReadLaterList) {
+fn list(read_later_list: &ReadLaterList, json: bool) -> Result<(), Box<Error>> {
     match read_later_list.len() {
         0 => {
-            println!("Read-later list empty");
+            if json {
+                println!("{}", serde_json::to_string_pretty(&ReadLaterList::new())?);
+            } else {
+                println!("Read-later list empty");
+            }
         }
         _ => {
-            println!("{}", read_later_list);
+            if json {
+                println!("{}", serde_json::to_string_pretty(read_later_list)?);
+            } else {
+                println!("{}", read_later_list);
+            }
         }
     }
+    Ok(())
 }
 
 fn save(read_later_list: &mut ReadLaterList, save_args: &ArgMatches) -> Result<(), Box<Error>> {
@@ -220,12 +236,25 @@ fn save(read_later_list: &mut ReadLaterList, save_args: &ArgMatches) -> Result<(
     Ok(())
 }
 
-fn show(read_later_list: &ReadLaterList, args: &ArgMatches) {
+fn show(read_later_list: &ReadLaterList, args: &ArgMatches, json: bool) -> Result<(), Box<Error>> {
     let url = args.value_of("url").unwrap();
     match read_later_list.get_link(url) {
-        None => println!("Link {} not found", url),
-        Some(link_entry) => println!("{}", link_entry),
+        None => {
+            if json {
+                println!("{}", json!({}));
+            } else {
+                println!("Link {} not found", url);
+            }
+        }
+        Some(link_entry) => {
+            if json {
+                println!("{}", serde_json::to_string_pretty(&link_entry)?);
+            } else {
+                println!("{}", link_entry)
+            }
+        }
     }
+    Ok(())
 }
 
 fn delete(read_later_list: &mut ReadLaterList, args: &ArgMatches) {
@@ -266,7 +295,7 @@ fn tag(read_later_list: &mut ReadLaterList, args: &ArgMatches) -> Result<(), Box
     Ok(())
 }
 
-fn search(read_later_list: &ReadLaterList, args: &ArgMatches) {
+fn search(read_later_list: &ReadLaterList, args: &ArgMatches, json: bool) -> Result<(), Box<Error>> {
     let keyword = args.value_of("keyword").unwrap();
     let re = RegexBuilder::new(&regex::escape(keyword))
         .case_insensitive(true)
@@ -282,7 +311,20 @@ fn search(read_later_list: &ReadLaterList, args: &ArgMatches) {
         .collect();
     let results_list = ReadLaterList::new().add_links(results);
     match results_list.len() {
-        0 => println!("No results found"),
-        _ => println!("{}", results_list),
+        0 => {
+            if json {
+                println!("{}", serde_json::to_string_pretty(&ReadLaterList::new())?);
+            } else {
+                println!("No results found");
+            }
+        }
+        _ => {
+            if json {
+                println!("{}", serde_json::to_string_pretty(&results_list)?);
+            } else {
+                println!("{}", results_list);
+            }
+        }
     }
+    Ok(())
 }

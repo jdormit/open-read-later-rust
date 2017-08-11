@@ -5,8 +5,9 @@ use std::string::String;
 use std::collections::HashMap;
 use std::collections::hash_map::Values;
 use regex::Regex;
+use serde::ser::Serialize;
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct LinkEntry {
     pub url: String,
     pub title: String,
@@ -124,7 +125,7 @@ impl fmt::Display for LinkEntry {
     }
 }
 
-#[derive(Debug, Clone, PartialEq)]
+#[derive(Debug, Clone, PartialEq, Serialize)]
 pub struct ReadLaterList {
     links: HashMap<String, LinkEntry>,
 }
